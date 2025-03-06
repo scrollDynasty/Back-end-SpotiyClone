@@ -22,17 +22,26 @@ import checkAuth from '../utils/checkAuth.js'
 
 export const login = async (req,res) => {
   try{
-    const user = await  UserModel.findOne({email: req.body.email});
+    // Проверка результатов валидации
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Ошибка валидации данных', 
+        errors: errors.array() 
+      });
+    }
+
+    const user = await UserModel.findOne({email: req.body.email});
     if(!user){
-      return req.status(404).json({
-        message: 'Пользоваетль не найден',
+      return res.status(404).json({
+        message: 'Пользователь с таким email не найден',
       });
     }
 
     const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash);
     if (!isValidPass){
-      return res.status(404).json({
-        message: 'Password не найден',
+      return res.status(400).json({
+        message: 'Неверный пароль',
       });
     }
 
@@ -40,28 +49,39 @@ export const login = async (req,res) => {
       {
         _id:user._id, // Использование ID пользователя в качестве payload
       }
-      , 'secret123', // Секретный ключ для подписи токена
+      , process.env.JWT_SECRET, // Секретный ключ для подписи токена из переменных окружения
       {
         expiresIn: '30d', // Срок действия токена - 30 дней
       })
 
+    // Исключаем passwordHash из ответа
+    const { passwordHash, ...userData } = user._doc;
+
     // Возвращение ответа с данными пользователя и токеном
     res.json({
-      user, // Данные пользователя
+      ...userData, // Данные пользователя без пароля
       token, // JWT токен
     });
   }catch(err){
-    return res.status(404).json({
-      message: 'Говно доля',
+    console.log(err);
+    return res.status(500).json({
+      message: 'Ошибка при авторизации. Пожалуйста, попробуйте позже.',
     });
-
   }
-
 }
 
 
 export const register = async (req,res) => {
   try{
+    // Проверка результатов валидации
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Ошибка валидации данных', 
+        errors: errors.array() 
+      });
+    }
+
     // Получение пароля из тела запроса
     const password = req.body.password;
     // Генерация "соли" для хеширования пароля
@@ -84,14 +104,17 @@ export const register = async (req,res) => {
       {
         _id:user._id, // Использование ID пользователя в качестве payload
       }
-      , 'secret123', // Секретный ключ для подписи токена
+      , process.env.JWT_SECRET, // Секретный ключ для подписи токена из переменных окружения
       {
         expiresIn: '30d', // Срок действия токена - 30 дней
       })
 
+    // Исключаем passwordHash из ответа
+    const { passwordHash: pass, ...userData } = user._doc;
+
     // Возвращение ответа с данными пользователя и токеном
     res.json({
-      user, // Данные пользователя
+      ...userData, // Данные пользователя без пароля
       token, // JWT токен
     });
   }catch(err){
@@ -99,9 +122,8 @@ export const register = async (req,res) => {
     console.log(err)
     // Возвращение статуса 500 и сообщения об ошибке
     res.status(500).json({
-        message: 'Sorry! You not is goodman :( Please regist again'
+        message: 'Ошибка при регистрации. Пожалуйста, попробуйте позже.'
     })
   }
-
 }
 

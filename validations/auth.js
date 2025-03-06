@@ -4,9 +4,14 @@ export const registerValidator = [
     body('email').isEmail(),
     body('password').isLength({min:5}),
     body('fullName').isLength({min:3}),
-    body('avatarUrl').optional().isURL(),
-
-
+    body('avatarUrl').optional().isURL({
+        require_protocol: false,
+        require_host: false,
+        allow_protocol_relative_urls: true,
+        allow_trailing_dot: true,
+        allow_fragments: true,
+        allow_query_components: true
+    }),
 ]
 
 
@@ -14,10 +19,6 @@ export const registerValidator = [
 export const loginValidation = [
     body('email').isEmail(),
     body('password').isLength({min:5}),
-    body('fullName').isLength({min:3}),
-    body('avatarUrl').optional().isURL(),
-
-
 ]
 
 
