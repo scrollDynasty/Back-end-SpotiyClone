@@ -1,6 +1,6 @@
 
 
-# Back-end-SpotiyClone 
+# Back-end-SpotiyClone ( ver3.5 )
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/DKhorov/Back-end-SpotiyClone?style=flat-square)
 ![GitHub repo size](https://img.shields.io/github/repo-size/DKhorov/Back-end-SpotiyClone?style=flat-square)
