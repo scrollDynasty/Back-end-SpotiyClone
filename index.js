@@ -1,87 +1,109 @@
-console.log("Spotify Clone Back-end");
+// -------------------------------
+// Backend сервер для Spotify клона
+// -------------------------------
 
-// Импорт необходимых модулей
-import cors from 'cors'; // Модуль для обработки CORS (Cross-Origin Resource Sharing)
-import multer from 'multer'; // Модуль для обработки загрузки файлов
-import path from 'path';
-import express from 'express'; // Фреймворк для создания сервера
-import jwt from 'jsonwebtoken'; // Модуль для работы с JWT (JSON Web Tokens)
-import mongoose from 'mongoose'; // Модуль для работы с MongoDB
-import bcrypt from 'bcrypt'; // Модуль для хеширования паролей
-import {registerValidator} from './validations/auth.js'; // Валидатор для регистрации
-import {loginValidation} from './validations/auth.js'; // Валидатор для входа
-import {validationResult} from 'express-validator'; // Модуль для обработки результатов валидации
-import UserModel from './models/user.js'; // Модель пользователя
-import {uc} from './control/index.js'; // Импорт контроллеров
-import checkAuth from './utils/checkAuth.js'; // Мидлвар для проверки авторизации
-import { register } from './control/control.js'; // Функция регистрации
-import {fileFilter, getAudio} from "./control/AudioService.js"; // импорт функции с AudioService
+// Импортируем необходимые модули
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import xss from 'xss-clean';
+import cookieParser from 'cookie-parser';
+import multer from 'multer';
 
-// Подключение к MongoDB с использованием mongoose
-mongoose
- .connect('mongo-url')
- .then(()=>{console.log("Статус базы данных --- OK")}) // Если подключение успешно, выводим сообщение "DataBase --- OK"
- .catch((err)=>{console.log("Статус базы данных --- ERROR" , err)}); // Если произошла ошибка, выводим сообщение "DataBase --- ERROR" и саму ошибку
+// Импортируем пользовательские модули и middleware
+import { registerValidator, loginValidation } from './validations/auth.js';
+import { uc } from './control/index.js';
+import checkAuth from './utils/checkAuth.js';
+import { fileFilter, getAudio } from "./control/AudioService.js";
 
-// Создание экземпляра приложения express
+// -------------------------------
+// Подключение к базе данных MongoDB
+// -------------------------------
+mongoose.connect('API_KEY', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Подключено к MongoDB');
+}).catch((err) => {
+  console.error('Ошибка подключения к MongoDB:', err);
+});
+
+// -------------------------------
+// Инициализация приложения Express
+// -------------------------------
 const app = express();
 
-// Настройка multer для загрузки файлов
+// -------------------------------
+// Middleware для обеспечения безопасности
+// -------------------------------
+app.use(helmet()); // Установка заголовков безопасности
+app.use(xss()); // Защита от XSS атак
+app.use(cookieParser()); // Парсинг cookies
+
+// -------------------------------
+// Ограничение скорости запросов
+// -------------------------------
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 100, // Ограничение на 100 запросов за окно windowMs для каждого IP
+});
+app.use(limiter);
+
+// -------------------------------
+// Настройка middleware
+// -------------------------------
+app.use(express.json()); // Парсинг JSON тел запросов
+app.use(cors()); // Включение CORS для всех маршрутов
+
+// -------------------------------
+// Конфигурация загрузки файлов
+// -------------------------------
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Указываем папку для сохранения файлов
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname); // Сохраняем файл с оригинальным именем
-    }
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Указываем папку для сохранения файлов
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Генерируем уникальное имя файла
+  }
 });
+const upload = multer({ storage: storage, fileFilter }); // Инициализируем multer с настройками хранилища
 
-// Использование middleware для обработки JSON и CORS
-app.use(express.json()); // Позволяет парсить JSON-тела запросов
-app.use(cors()); // Включает CORS для всех маршрутов
+// -------------------------------
+// Статические файлы
+// -------------------------------
+app.use('/uploads', express.static('uploads')); // Позволяем обслуживать статические файлы из папки uploads
 
-// Настройка статической папки для загрузок
-app.use('/uploads', express.static('uploads'));
+// -------------------------------
+// Маршруты
+// -------------------------------
 
-// Инициализация multer с настройками хранилища
-const upload = multer({ storage: storage, fileFilter });
-
-// Маршрут для загрузки файлов !-!-! (поменял маршрут с /upload на /audio/upload) !-!-!
-app.post('/audio/upload', upload.single('music'), (req, res) => {
-
-    return res.json({
-        url: `/uploads/${req.file.filename}`,
-        info: req.file
-    })
-})
-
-// Ловим и выводим ошибки от мультера
-app.use((err, req, res, next) => {
-
-    if (err instanceof multer.MulterError) {
-        return res.status(400).json({ message: err.message })
-    }
-    else if (err) {
-        return res.status(400).json({ message: err.message })
-    }
-
-    next()
-});
-
-// Маршрут для получения данных об аудиофайле
-app.get("/audio/get/:songName", getAudio)
-
-// Маршруты для аутентификации
+// Маршруты аутентификации
 app.post('/auth/login', loginValidation, uc.login); // Маршрут для входа
 app.post('/auth/register', registerValidator, uc.register); // Маршрут для регистрации
+app.post('/auth/update-role', uc.updateUserRole); // Маршрут для обновления роли пользователя
+app.get("/user/me", checkAuth, uc.getMe); // Маршрут для получения информации о текущем пользователе
 
-// Маршрут для получения данных о пользователе
-app.get("/user/me", /*решил не вставлять валидации никакие*/ uc.getMe)
+// Маршруты аудио
+app.post('/audio/upload', upload.single('music'), (req, res) => {
+  res.json({ message: 'Файл успешно загружен' });
+}); // Маршрут для загрузки аудиофайла
+app.get("/audio/get/:songName", getAudio); // Маршрут для получения данных об аудиофайле
 
-// Запуск сервера на порту 4000
+// -------------------------------
+// Обработка ошибок
+// -------------------------------
+app.use((err, req, res, next) => {
+  res.status(500).json({ message: 'Внутренняя ошибка сервера' });
+});
+
+// -------------------------------
+// Запуск сервера
+// -------------------------------
 app.listen(4000, (err) => {
-    if (err) {
-        return console.log("Статус сервера --- ERROR ");
-    }
-    console.log("Статус сервера --- OK");
+  if (err) {
+    return console.error("Ошибка сервера:", err);
+  }
+  console.log("Сервер запущен на порту 4000");
 });
