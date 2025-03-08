@@ -6,6 +6,8 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/DKhorov/Back-end-SpotiyClone?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues/DKhorov/Back-end-SpotiyClone?style=flat-square)
 ![SpotifyClone pet Community Project](https://img.shields.io/badge/SpotifyClone-pet-blue)
+![SpotifyClone pet Community Project](https://img.shields.io/badge/Version-4-red)
+
 
 ---
 
