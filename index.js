@@ -4,7 +4,7 @@
 
 // Импортируем необходимые модули
 import express from 'express';
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -21,14 +21,16 @@ import { fileFilter, getAudio } from "./control/AudioService.js";
 // -------------------------------
 // Подключение к базе данных MongoDB
 // -------------------------------
-mongoose.connect('API_KEY', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('Подключено к MongoDB');
-}).catch((err) => {
-  console.error('Ошибка подключения к MongoDB:', err);
-});
+//  Реализовано получение базы данных через фабрику
+// -------------------------------
+// mongoose.connect('API_KEY', {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true
+// }).then(() => {
+//   console.log('Подключено к MongoDB');
+// }).catch((err) => {
+//   console.error('Ошибка подключения к MongoDB:', err);
+// });
 
 // -------------------------------
 // Инициализация приложения Express
