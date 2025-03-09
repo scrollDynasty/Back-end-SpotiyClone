@@ -193,12 +193,6 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ message: "Invalid role" });
     }
 
-    // const updatedUser = await UserModel.findOneAndUpdate(
-    //   { email: email },
-    //   { role: role },
-    //   { new: true }
-    // );
-
     const user = await userService.findByEmail(email);
 
     if (!user) {
@@ -230,6 +224,78 @@ export const updateUserRole = async (req, res) => {
     }
     res.status(500).json({
       message: "An error occurred while updating user role",
+    });
+  }
+};
+
+// Контроллер для запроса восстановления пароля
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Создаем токен для сброса пароля
+    const resetData = await userService.createPasswordResetToken(email);
+
+    if (!resetData) {
+      // Не сообщаем, что пользователь не найден, чтобы избежать утечки информации
+      return res.json({
+        success: true,
+        message: "Если указанный email зарегистрирован, инструкции по восстановлению пароля будут отправлены"
+      });
+    }
+
+    // В реальном приложении здесь должна быть отправка email с ссылкой для сброса пароля
+    // Например: await sendResetPasswordEmail(resetData.email, resetData.resetToken, resetData.fullName);
+
+    // Для демонстрации просто возвращаем токен в ответе
+    // В реальном приложении лучше не возвращать токен, а только сообщение об успешной отправке
+    res.json({
+      success: true,
+      message: "Инструкции по восстановлению пароля отправлены на указанный email",
+      // Только для демонстрации, в реальном приложении не возвращайте токен
+      resetToken: resetData.resetToken
+    });
+  } catch (err) {
+    console.error(err);
+    if (err instanceof UserError) {
+      return res.status(400).json({
+        message: err.message,
+      });
+    }
+    res.status(500).json({
+      message: "Произошла ошибка при обработке запроса на восстановление пароля",
+    });
+  }
+};
+
+// Контроллер для сброса пароля
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    // Сбрасываем пароль
+    const result = await userService.resetPassword(token, password);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Пароль успешно обновлен"
+    });
+  } catch (err) {
+    console.error(err);
+    if (err instanceof UserError) {
+      return res.status(400).json({
+        message: err.message,
+      });
+    }
+    res.status(500).json({
+      message: "Произошла ошибка при сбросе пароля",
     });
   }
 };

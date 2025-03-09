@@ -14,6 +14,8 @@ class SQliteUserRepository extends BaseUserRepository {
         avatarUrl TEXT,
         passwordHash TEXT NOT NULL,
         role TEXT NOT NULL CHECK(role IN ('user', 'artist', 'admin')) DEFAULT 'user',
+        resetPasswordToken TEXT,
+        resetPasswordExpires INTEGER,
         createdAt INTEGER, -- Для timestamps
         updatedAt INTEGER  -- Для timestamps
       )
@@ -69,10 +71,52 @@ class SQliteUserRepository extends BaseUserRepository {
   }
 
   async update(id, data) {
-    const sql = "UPDATE users SET fullName = ?, avatarUrl = ?, role = ?, updatedAt = ? WHERE id = ?";
+    // Создаем динамический SQL запрос на основе переданных данных
+    const updateFields = [];
+    const values = [];
+
+    if (data.fullName !== undefined) {
+      updateFields.push("fullName = ?");
+      values.push(data.fullName);
+    }
+
+    if (data.avatarUrl !== undefined) {
+      updateFields.push("avatarUrl = ?");
+      values.push(data.avatarUrl);
+    }
+
+    if (data.role !== undefined) {
+      updateFields.push("role = ?");
+      values.push(data.role);
+    }
+
+    if (data.passwordHash !== undefined) {
+      updateFields.push("passwordHash = ?");
+      values.push(data.passwordHash);
+    }
+
+    if (data.resetPasswordToken !== undefined) {
+      updateFields.push("resetPasswordToken = ?");
+      values.push(data.resetPasswordToken);
+    }
+
+    if (data.resetPasswordExpires !== undefined) {
+      updateFields.push("resetPasswordExpires = ?");
+      values.push(data.resetPasswordExpires ? data.resetPasswordExpires.getTime() : null);
+    }
+
+    // Добавляем обновление времени
+    updateFields.push("updatedAt = ?");
     const now = Date.now();
+    values.push(now);
+
+    // Добавляем id в конец массива значений
+    values.push(id);
+
+    const sql = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
+
     return new Promise((resolve, reject) => {
-      this.db.run(sql, [data.fullName, data.avatarUrl, data.role, now, id], function (err) {
+      this.db.run(sql, values, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -107,6 +151,8 @@ class SQliteUserRepository extends BaseUserRepository {
       this.db.get(sql, [email], (err, row) => {
         if (err) {
           reject(new UserError(err.message));
+        } else if (!row) {
+          resolve(null);
         } else {
           resolve({
             id: row.id,
@@ -114,7 +160,33 @@ class SQliteUserRepository extends BaseUserRepository {
             email: row.email,
             avatarUrl: row.avatarUrl,
             role: row.role,
-            passwordHash: row.passwordHash
+            passwordHash: row.passwordHash,
+            resetPasswordToken: row.resetPasswordToken,
+            resetPasswordExpires: row.resetPasswordExpires ? new Date(row.resetPasswordExpires) : null
+          });
+        }
+      });
+    });
+  }
+
+  async findByResetToken(token) {
+    const sql = "SELECT * FROM users WHERE resetPasswordToken = ?";
+    return new Promise((resolve, reject) => {
+      this.db.get(sql, [token], (err, row) => {
+        if (err) {
+          reject(new UserError(err.message));
+        } else if (!row) {
+          resolve(null);
+        } else {
+          resolve({
+            id: row.id,
+            fullName: row.fullName,
+            email: row.email,
+            avatarUrl: row.avatarUrl,
+            role: row.role,
+            passwordHash: row.passwordHash,
+            resetPasswordToken: row.resetPasswordToken,
+            resetPasswordExpires: row.resetPasswordExpires ? new Date(row.resetPasswordExpires) : null
           });
         }
       });

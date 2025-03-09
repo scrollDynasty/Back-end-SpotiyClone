@@ -26,6 +26,8 @@
     "node-id3": "^0.2.8",
     "nodemon": "^3.1.9",
     "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "xss-clean": "^0.1.4"
   }
 }

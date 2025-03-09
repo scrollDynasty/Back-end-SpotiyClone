@@ -30,3 +30,14 @@ export const PostCreateValidation = [
 
 
 ]
+
+// Валидация для запроса восстановления пароля
+export const forgotPasswordValidation = [
+    body('email').isEmail(),
+]
+
+// Валидация для сброса пароля
+export const resetPasswordValidation = [
+    body('token').isString(),
+    body('password').isLength({min:5}),
+]
