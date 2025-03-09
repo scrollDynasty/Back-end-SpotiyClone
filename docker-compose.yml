@@ -1,0 +1,18 @@
+version: "3.8" # Указываем версию Docker Compose
+
+services:
+  postgres:
+    image: postgres:15 # Официальный образ PostgreSQL (версия 15)
+    container_name: spotify-clone-postgres # Имя контейнера
+    environment:
+      POSTGRES_USER: myuser # Имя пользователя
+      POSTGRES_PASSWORD: mypassword # Пароль
+      POSTGRES_DB: spotify-clone # Имя базы данных
+    ports:
+      - "5432:5432" # Проброс порта (локальный:контейнер)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data # Том для сохранения данных
+    restart: unless-stopped # Перезапуск при сбоях, если не остановлен вручную
+
+volumes:
+  postgres-data: # Определяем том для данных
