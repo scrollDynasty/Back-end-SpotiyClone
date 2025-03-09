@@ -252,9 +252,6 @@ app.get("/user/me", checkAuth, uc.getMe); // Маршрут для получе�
  *                   type: boolean
  *                 message:
  *                   type: string
- *                 resetToken:
- *                   type: string
- *                   description: Токен для сброса пароля (только для демонстрации)
  *       500:
  *         description: Ошибка при обработке запроса
  */
@@ -265,6 +262,7 @@ app.post('/auth/forgot-password', forgotPasswordValidation, uc.forgotPassword); 
  * /auth/reset-password:
  *   post:
  *     summary: Сброс пароля
+ *     description: Для сброса пароля необходимо указать токен из URL, код из письма и email.
  *     tags: [Аутентификация]
  *     requestBody:
  *       required: true
@@ -274,13 +272,24 @@ app.post('/auth/forgot-password', forgotPasswordValidation, uc.forgotPassword); 
  *             type: object
  *             required:
  *               - token
+ *               - code
+ *               - email
  *               - password
  *             properties:
  *               token:
  *                 type: string
+ *                 description: Токен сброса пароля из URL
+ *               code:
+ *                 type: string
+ *                 description: Код подтверждения из письма
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email пользователя
  *               password:
  *                 type: string
  *                 minLength: 5
+ *                 description: Новый пароль
  *     responses:
  *       200:
  *         description: Пароль успешно обновлен
@@ -294,7 +303,7 @@ app.post('/auth/forgot-password', forgotPasswordValidation, uc.forgotPassword); 
  *                 message:
  *                   type: string
  *       400:
- *         description: Недействительный токен или срок его действия истек
+ *         description: Недействительный токен или код подтверждения
  *       500:
  *         description: Ошибка при сбросе пароля
  */
@@ -305,6 +314,42 @@ app.post('/audio/upload', upload.single('music'), (req, res) => {
   res.json({ message: 'Файл успешно загружен' });
 }); // Маршрут для загрузки аудиофайла
 app.get("/audio/get/:songName", getAudio); // Маршрут для получения данных об аудиофайле
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Получение списка всех пользователей
+ *     tags: [Пользователи]
+ *     responses:
+ *       200:
+ *         description: Список всех пользователей
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       fullName:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       avatarUrl:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ *       500:
+ *         description: Ошибка при получении списка пользователей
+ */
+app.get("/users", uc.getAllUsers); // Маршрут для получения списка всех пользователей
 
 // -------------------------------
 // Обработка ошибок

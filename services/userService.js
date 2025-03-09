@@ -14,6 +14,10 @@ class UserService extends BaseService {
     return await this.userRepository.findByEmail(email);
   }
 
+  async findAll() {
+    return await this.userRepository.findAll();
+  }
+
   // Создание токена для сброса пароля
   async createPasswordResetToken(email) {
     const user = await this.findByEmail(email);

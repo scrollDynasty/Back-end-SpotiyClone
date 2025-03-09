@@ -22,6 +22,10 @@ class BaseUserRepository {
   async findByResetToken(token) {
     throw new Error("Not implemented");
   }
+
+  async findAll() {
+    throw new Error("Not implemented");
+  }
 }
 
 export default BaseUserRepository;

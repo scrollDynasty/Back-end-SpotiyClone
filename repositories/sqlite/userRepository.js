@@ -5,7 +5,7 @@ import UserError from "../../errors/userError.js";
 class SQliteUserRepository extends BaseUserRepository {
   constructor(db) {
     super();
-    this.db = db || new sqlite3.Database(":memory:");
+    this.db = db || new sqlite3.Database("./database.sqlite");
     this.db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,6 +188,30 @@ class SQliteUserRepository extends BaseUserRepository {
             resetPasswordToken: row.resetPasswordToken,
             resetPasswordExpires: row.resetPasswordExpires ? new Date(row.resetPasswordExpires) : null
           });
+        }
+      });
+    });
+  }
+
+  async findAll() {
+    const sql = "SELECT id, email, fullName, avatarUrl, role, passwordHash, resetPasswordToken, resetPasswordExpires, createdAt, updatedAt FROM users";
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, [], (err, rows) => {
+        if (err) {
+          reject(new UserError(err.message));
+        } else {
+          resolve(rows.map(row => ({
+            id: row.id,
+            fullName: row.fullName,
+            email: row.email,
+            avatarUrl: row.avatarUrl,
+            role: row.role,
+            passwordHash: row.passwordHash,
+            resetPasswordToken: row.resetPasswordToken,
+            resetPasswordExpires: row.resetPasswordExpires ? new Date(row.resetPasswordExpires) : null,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt
+          })));
         }
       });
     });
