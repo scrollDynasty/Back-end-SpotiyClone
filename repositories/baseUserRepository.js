@@ -18,6 +18,10 @@ class BaseUserRepository {
   async findByEmail(email) {
     throw new Error("Not implemented");
   }
+
+  async findByResetToken(token) {
+    throw new Error("Not implemented");
+  }
 }
 
 export default BaseUserRepository;

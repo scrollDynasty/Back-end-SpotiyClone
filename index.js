@@ -11,9 +11,11 @@ import rateLimit from 'express-rate-limit';
 import xss from 'xss-clean';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpecs from './config/swagger.js';
 
 // Импортируем пользовательские модули и middleware
-import { registerValidator, loginValidation } from './validations/auth.js';
+import { registerValidator, loginValidation, forgotPasswordValidation, resetPasswordValidation } from './validations/auth.js';
 import { uc } from './control/index.js';
 import checkAuth from './utils/checkAuth.js';
 import { fileFilter, getAudio } from "./control/AudioService.js";
@@ -60,6 +62,11 @@ app.use(express.json()); // Парсинг JSON тел запросов
 app.use(cors()); // Включение CORS для всех маршрутов
 
 // -------------------------------
+// Swagger документация
+// -------------------------------
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+// -------------------------------
 // Конфигурация загрузки файлов
 // -------------------------------
 const storage = multer.diskStorage({
@@ -81,11 +88,217 @@ app.use('/uploads', express.static('uploads')); // Позволяем обслу
 // Маршруты
 // -------------------------------
 
-// Маршруты аутентификации
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Вход пользователя
+ *     tags: [Аутентификация]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 5
+ *               fullName:
+ *                 type: string
+ *                 minLength: 3
+ *               avatarUrl:
+ *                 type: string
+ *                 format: uri
+ *     responses:
+ *       200:
+ *         description: Успешный вход
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                 token:
+ *                   type: string
+ *       404:
+ *         description: Пользователь не найден или неверный пароль
+ */
 app.post('/auth/login', loginValidation, uc.login); // Маршрут для входа
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Регистрация нового пользователя
+ *     tags: [Аутентификация]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 5
+ *               fullName:
+ *                 type: string
+ *                 minLength: 3
+ *               avatarUrl:
+ *                 type: string
+ *                 format: uri
+ *               role:
+ *                 type: string
+ *                 enum: [user, artist, admin]
+ *     responses:
+ *       200:
+ *         description: Пользователь успешно зарегистрирован
+ *       500:
+ *         description: Ошибка при регистрации
+ */
 app.post('/auth/register', registerValidator, uc.register); // Маршрут для регистрации
+
+/**
+ * @swagger
+ * /auth/update-role:
+ *   post:
+ *     summary: Обновление роли пользователя
+ *     tags: [Аутентификация]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - role
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               role:
+ *                 type: string
+ *                 enum: [user, artist, admin]
+ *     responses:
+ *       200:
+ *         description: Роль пользователя успешно обновлена
+ *       400:
+ *         description: Неверные данные
+ *       404:
+ *         description: Пользователь не найден
+ */
 app.post('/auth/update-role', uc.updateUserRole); // Маршрут для обновления роли пользователя
+
+/**
+ * @swagger
+ * /user/me:
+ *   get:
+ *     summary: Получение информации о текущем пользователе
+ *     tags: [Пользователи]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Информация о пользователе
+ *       401:
+ *         description: Не авторизован
+ */
 app.get("/user/me", checkAuth, uc.getMe); // Маршрут для получения информации о текущем пользователе
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Запрос на восстановление пароля
+ *     tags: [Аутентификация]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Инструкции по восстановлению пароля отправлены
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 resetToken:
+ *                   type: string
+ *                   description: Токен для сброса пароля (только для демонстрации)
+ *       500:
+ *         description: Ошибка при обработке запроса
+ */
+app.post('/auth/forgot-password', forgotPasswordValidation, uc.forgotPassword); // Маршрут для запроса восстановления пароля
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Сброс пароля
+ *     tags: [Аутентификация]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 5
+ *     responses:
+ *       200:
+ *         description: Пароль успешно обновлен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Недействительный токен или срок его действия истек
+ *       500:
+ *         description: Ошибка при сбросе пароля
+ */
+app.post('/auth/reset-password', resetPasswordValidation, uc.resetPassword); // Маршрут для сброса пароля
 
 // Маршруты аудио
 app.post('/audio/upload', upload.single('music'), (req, res) => {
@@ -108,4 +321,5 @@ app.listen(4000, (err) => {
     return console.error("Ошибка сервера:", err);
   }
   console.log("Сервер запущен на порту 4000");
+  console.log("Swagger документация доступна по адресу: http://localhost:4000/api-docs");
 });
