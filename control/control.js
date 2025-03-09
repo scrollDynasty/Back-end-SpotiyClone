@@ -18,6 +18,7 @@ import checkAuth from "../utils/checkAuth.js";
 
 import UserService from "../services/userService.js";
 import UserError from "../errors/userError.js";
+import emailService from '../services/emailService.js';
 
 const userService = new UserService();
 
@@ -83,47 +84,59 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
+    // Проверяем, существует ли пользователь с таким email
+    const existingUser = await userService.findByEmail(req.body.email);
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Пользователь с таким email уже существует",
+      });
+    }
+
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const doc = new UserModel({
+    // Создаем пользователя
+    const user = await userService.create({
       email: req.body.email,
       fullName: req.body.fullName,
       avatarUrl: req.body.avatarUrl,
       passwordHash,
-      role: req.body.role || "user", // Добавляем роль из запроса или устанавливаем 'user' по умолчанию
+      role: req.body.role || "user",
     });
 
-    // const user = await doc.save();
-    //теперь нужно создать пользователя через сервис
-    const user = await userService.create(doc);
-
+    // Генерируем JWT токен
     const token = jwt.sign(
       {
-        _id: user._id,
+        _id: user.id,
       },
-      "secret123",
+      process.env.JWT_SECRET || "secret123",
       {
-        expiresIn: "30d",
+        expiresIn: process.env.JWT_EXPIRES_IN || "30d",
       }
     );
 
-    const { passwordHash: _, ...userData } = user;
-
+    // Возвращаем ответ
     return res.json({
-      ...userData,
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+      },
       token,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (err instanceof UserError) {
       return res.status(400).json({
         message: err.message,
       });
     }
     return res.status(500).json({
-      message: "Sorry! You not is goodman :( Please register again",
+      message: "Ошибка при регистрации пользователя",
     });
   }
 };
@@ -244,16 +257,17 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // В реальном приложении здесь должна быть отправка email с ссылкой для сброса пароля
-    // Например: await sendResetPasswordEmail(resetData.email, resetData.resetToken, resetData.fullName);
+    // Отправляем email с ссылкой для сброса пароля
+    const emailSent = await emailService.sendPasswordResetEmail(
+      resetData.email, 
+      resetData.resetToken, 
+      resetData.fullName
+    );
 
-    // Для демонстрации просто возвращаем токен в ответе
-    // В реальном приложении лучше не возвращать токен, а только сообщение об успешной отправке
+    // Возвращаем ответ
     res.json({
       success: true,
-      message: "Инструкции по восстановлению пароля отправлены на указанный email",
-      // Только для демонстрации, в реальном приложении не возвращайте токен
-      resetToken: resetData.resetToken
+      message: "Инструкции по восстановлению пароля отправлены на указанный email"
     });
   } catch (err) {
     console.error(err);
@@ -271,8 +285,25 @@ export const forgotPassword = async (req, res) => {
 // Контроллер для сброса пароля
 export const resetPassword = async (req, res) => {
   try {
-    const { token, password } = req.body;
-
+    const { token, code, password, email } = req.body;
+    
+    // Проверяем, что токен и код указаны
+    if (!token || !code || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "Необходимо указать токен, код и email для сброса пароля"
+      });
+    }
+    
+    // Проверяем код и email
+    const isCodeValid = emailService.verifyResetCode(code, email);
+    if (!isCodeValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Недействительный или устаревший код подтверждения"
+      });
+    }
+    
     // Сбрасываем пароль
     const result = await userService.resetPassword(token, password);
 
@@ -296,6 +327,22 @@ export const resetPassword = async (req, res) => {
     }
     res.status(500).json({
       message: "Произошла ошибка при сбросе пароля",
+    });
+  }
+};
+
+// Контроллер для получения списка всех пользователей
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await userService.findAll();
+    res.json({
+      success: true,
+      users
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Произошла ошибка при получении списка пользователей",
     });
   }
 };

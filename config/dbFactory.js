@@ -11,29 +11,15 @@ import MongoUserRepository from "../repositories/mongodb/userRepository.js";
 class DBFactory {
   constructor() {
     this.env = process.env.NODE_ENV || "development";
-    this.db =
-      this.env === "production" ? null : new sqlite3.Database(":memory:");
-    if (this.env === "production") {
-      mongoose
-        .connect(process.env.DB_URL, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        })
-        .then(() => {
-          console.log("Подключено к MongoDB");
-        })
-        .catch((err) => {
-          console.error("Ошибка подключения к MongoDB:", err);
-        });
-    }
+    // Используем SQLite с сохранением данных в файл
+    this.db = new sqlite3.Database("./database.sqlite");
+    console.log("Используется SQLite с сохранением данных в файл database.sqlite");
   }
 
   getRepository(entity) {
     switch (entity) {
       case "user":
-        return this.env === "production"
-          ? new MongoUserRepository()
-          : new SQliteUserRepository(this.db);
+        return new SQliteUserRepository(this.db);
       default:
         throw new Error(`Repository for entity "${entity}" not found`);
     }

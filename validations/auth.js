@@ -38,6 +38,8 @@ export const forgotPasswordValidation = [
 
 // Валидация для сброса пароля
 export const resetPasswordValidation = [
-    body('token').isString(),
-    body('password').isLength({min:5}),
+    body('token').isString().withMessage('Токен обязателен'),
+    body('code').isString().withMessage('Код подтверждения обязателен'),
+    body('email').isEmail().withMessage('Укажите корректный email'),
+    body('password').isLength({min:5}).withMessage('Пароль должен содержать минимум 5 символов'),
 ]
