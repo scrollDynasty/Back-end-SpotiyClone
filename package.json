@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start:dev": "nodemon index.js"
+    "start:dev": "nodemon index.js",
+    "start:dev:sqlite": "NODE_ENV=development-sqlite nodemon index.js"
   },
   "author": "",
   "license": "ISC",
