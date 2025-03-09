@@ -412,8 +412,6 @@ Middleware обеспечивают дополнительную функцио�
   
   ---
   
-  <img src="/logo/Clone.png" alt="SpotifyClone Logo" width="150" height="150">
-  
   **Made with ❤️ by SpotifyClone Pet Community**
   
   [GitHub](https://github.com/DKhorov/Back-end-SpotiyClone) • [Documentation](http://localhost:4000/api-docs) • [Issues](https://github.com/DKhorov/Back-end-SpotiyClone/issues)
