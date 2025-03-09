@@ -2,7 +2,7 @@
 
 <div align="center">
   
-  ![SpotifyClone Logo](/logo/Clone.png)
+  <img src="/logo/Clone.png" alt="SpotifyClone Logo" width="250" height="250">
   
   [![GitHub last commit](https://img.shields.io/github/last-commit/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone/commits/main)
   [![GitHub repo size](https://img.shields.io/github/repo-size/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
@@ -36,7 +36,7 @@
 ## 🆕 Что нового в обновлении
 
 <div align="center">
-  <img src="https://i.imgur.com/UpdateImage.png" alt="Обновления проекта" width="600">
+  <img src="/logo/Clone.png" alt="Обновления проекта" width="400" height="400">
 </div>
 
 <details>
@@ -103,7 +103,7 @@
 ## 📘 API Документация
 
 <div align="center">
-  <img src="https://i.imgur.com/SwaggerUI.png" alt="Swagger UI" width="700">
+  <img src="/logo/Clone.png" alt="Swagger UI" width="500" height="300">
   
   *Интерактивная документация API доступна по адресу `http://localhost:4000/api-docs`*
 </div>
@@ -148,7 +148,7 @@ node index.js
 ## 🔑 Восстановление пароля
 
 <div align="center">
-  <img src="https://i.imgur.com/PasswordResetFlow.png" alt="Процесс восстановления пароля" width="700">
+  <img src="/logo/Clone.png" alt="Процесс восстановления пароля" width="500" height="300">
 </div>
 
 ### 🔄 Процесс восстановления пароля
@@ -218,7 +218,7 @@ FRONTEND_URL=http://localhost:3000
 ## 🛡️ Защита от API-атак
 
 <div align="center">
-  <img src="https://i.imgur.com/SecurityImage.png" alt="Защита API" width="600">
+  <img src="/logo/Clone.png" alt="Защита API" width="400" height="400">
 </div>
 
 ### 🔒 Реализованные меры безопасности
@@ -316,7 +316,7 @@ const upload = multer({ storage: storage, fileFilter });
 ## 🏗️ Архитектура
 
 <div align="center">
-  <img src="https://i.imgur.com/ArchitectureDiagram.png" alt="Архитектура проекта" width="700">
+  <img src="/logo/Clone.png" alt="Архитектура проекта" width="500" height="300">
 </div>
 
 ### 🧩 Основные компоненты
@@ -380,7 +380,7 @@ Middleware обеспечивают дополнительную функцио�
 ## 👨‍💻 Для разработчиков (Back-end темы)
 
 <div align="center">
-  <img src="https://i.imgur.com/DevelopersImage.png" alt="Для разработчиков" width="600">
+  <img src="/logo/Clone.png" alt="Для разработчиков" width="400" height="400">
 </div>
 
 > **⚠️ Внимание**: Изменение роли по email временно доступно для тестирования. В будущем эта функциональность может быть изменена или удалена.
@@ -412,7 +412,7 @@ Middleware обеспечивают дополнительную функцио�
   
   ---
   
-  <img src="https://i.imgur.com/YourLogo.png" alt="SpotifyClone Logo" width="150">
+  <img src="/logo/Clone.png" alt="SpotifyClone Logo" width="150" height="150">
   
   **Made with ❤️ by SpotifyClone Pet Community**
   
