@@ -8,7 +8,7 @@
   [![GitHub repo size](https://img.shields.io/github/repo-size/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
   [![GitHub issues](https://img.shields.io/github/issues/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone/issues)
   [![SpotifyClone pet Community Project](https://img.shields.io/badge/SpotifyClone-pet-blue?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
-  [![Version](https://img.shields.io/badge/Version-4.2-red?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
+  [![Version](https://img.shields.io/badge/Version-4.3-red?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
   
   **Современный бэкенд для музыкального стриминг-сервиса**
