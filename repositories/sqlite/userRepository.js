@@ -5,7 +5,7 @@ import UserError from "../../errors/userError.js";
 class SQliteUserRepository extends BaseUserRepository {
   constructor(db) {
     super();
-    this.db = db || new sqlite3.Database("./database.sqlite");
+    this.db = db;
     this.db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

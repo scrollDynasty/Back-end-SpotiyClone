@@ -8,7 +8,7 @@
   [![GitHub repo size](https://img.shields.io/github/repo-size/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
   [![GitHub issues](https://img.shields.io/github/issues/DKhorov/Back-end-SpotiyClone?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone/issues)
   [![SpotifyClone pet Community Project](https://img.shields.io/badge/SpotifyClone-pet-blue?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
-  [![Version](https://img.shields.io/badge/Version-4.2-red?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
+  [![Version](https://img.shields.io/badge/Version-4.3-red?style=flat-square)](https://github.com/DKhorov/Back-end-SpotiyClone)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
   
   **Современный бэкенд для музыкального стриминг-сервиса**
@@ -38,6 +38,12 @@
 <div align="center">
   <h3>🚀 Новые функции и улучшения</h3>
 </div>
+
+<details>
+<summary>🚀 Версия 4.3</summary>
+
+- **✨ PostgreSQL Support
+</details>
 
 <details>
 <summary>🚀 Версия 4.2</summary>
@@ -412,7 +418,7 @@ Middleware обеспечивают дополнительную функцио�
   
   ---
   
-  <img src="/logo/Clone.png" alt="SpotifyClone Logo" width="150" height="150">
+  <img src="https://i.imgur.com/YourLogo.png" alt="SpotifyClone Logo" width="150">
   
   **Made with ❤️ by SpotifyClone Pet Community**
   
